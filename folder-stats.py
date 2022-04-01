@@ -66,9 +66,41 @@ def show_most_recent_file_by_folder():
     except IndexError:
         print("Usage: "+sys.argv[0]+" <Path>")
 
+class FolderStats():
+    def __init__(self,path) -> None:
+        self.record = {"path": None, "count": 0, "size": 0}
+        self.count = 0
+        self.size = 0
+        
+        for entry in os.listdir(path):
+            entry = f"{path}/{entry}"
+            if os.path.isfile(entry):              
+                self.count = self.count + 1
+                self.size = self.size + os.path.getsize(entry)
+        self.record["path"] = path
+        self.record["count"] = self.count
+        self.record["size"] = self.size
+
+def show_folder_stats(path):
+    all_records = []
+    dirnames = []
+    for root,d_names,f_names in os.walk(path):
+        for d in d_names:
+           dirnames.append(os.path.join(root, d))
+    for d in dirnames:   
+        f = FolderStats(d)
+        all_records.append(f.record)
+    df = pandas.DataFrame.from_records(all_records,index=range(1,len(all_records) + 1))
+    df.loc[:, "size"] = df["size"].map('{:,d}'.format)
+    print(df.sort_values(by=["size"],ascending=False))
+
+pandas.set_option('display.max_colwidth', None)
+
 if __name__ == "__main__":
     print("1. Show most recent jpg timestamp by folder")
-    print("")
-    option = input("Enter an option from 1 to 1:")    
+    print("2. Show folder stats")
+    option = input("Enter an option from 1 to 2:")    
     if option == "1":
         show_most_recent_file_by_folder()
+    elif option == "2":
+        show_folder_stats(sys.argv[1])

@@ -80,19 +80,19 @@ class FolderStats():
         self.record["path"] = path
         self.record["count"] = self.count
         self.record["size"] = self.size
-
-def show_folder_stats(path):
-    all_records = []
-    dirnames = []
-    for root,d_names,f_names in os.walk(path):
-        for d in d_names:
-           dirnames.append(os.path.join(root, d))
-    for d in dirnames:   
-        f = FolderStats(d)
-        all_records.append(f.record)
-    df = pandas.DataFrame.from_records(all_records,index=range(1,len(all_records) + 1))
-    df.loc[:, "size"] = df["size"].map('{:,d}'.format)
-    print(df.sort_values(by=["size"],ascending=False))
+class FoldersStats():
+    def __init__(self, path) -> None:
+        all_records = []
+        dirnames = []
+        for root,d_names,f_names in os.walk(path):
+            for d in d_names:
+                dirnames.append(os.path.join(root, d))
+        for d in dirnames:   
+            f = FolderStats(d)
+            all_records.append(f.record)
+        df = pandas.DataFrame.from_records(all_records,index=range(1,len(all_records) + 1))
+        df.loc[:, "size"] = df["size"].map('{:,d}'.format)
+        self.folders = df.sort_values(by=["size"],ascending=False)
 
 pandas.set_option('display.max_colwidth', None)
 
@@ -103,4 +103,5 @@ if __name__ == "__main__":
     if option == "1":
         show_most_recent_file_by_folder()
     elif option == "2":
-        show_folder_stats(sys.argv[1])
+        fs = FoldersStats(sys.argv[1])
+        print(fs.folders)

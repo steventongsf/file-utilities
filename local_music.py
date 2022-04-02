@@ -22,13 +22,15 @@ class MediaFile():
             self.attributes["album_artist"] = audiofile.tag.album_artist
             self.attributes["album"] = audiofile.tag.album
             self.attributes["publisher"] = audiofile.tag.publisher
-            date = audiofile.tag.best_release_date
+            date = audiofile.tag.getBestDate()
             self.attributes["release_year"] = date.year
             self.attributes["duration_seconds"] = audiofile.info.time_secs
+            #self.attributes["genre"] = audiofile.Genre
         # TODO Add support for other media types like mp4, wmv, etc.
 class FileFinder():
     def __init__(self) -> None:
-        pass
+        self.mp3_records = []
+
     def get_files(self,path, handler):
         all_records = []
         dirnames = []
@@ -37,24 +39,24 @@ class FileFinder():
             for d in d_names:
                 dirnames.append(os.path.join(root, d))
         for d in dirnames:    
-            print(d)
+            #print(d)
             for e in os.listdir(d):
                 filenames.append(f"{d}/{e}")
-        print(filenames)
+        #print(filenames)
         for f in filenames:
-            handler(f)
+            row = handler(f)
+            if row is not None:
+                self.mp3_records.append(row)
 class MediaLibrary():
     pass
-
-mp3_count = 0
 
 def mp3_handler(file):
     global mp3_count
     if pathlib.Path(file).suffix == ".mp3":
-        #print("from handler:"+file)
         mf = MediaFile(file)
-        print(mf.attributes)
-        mp3_count = mp3_count + 1
+        return mf.attributes
+    else:
+        return None
 
 
 if __name__ == "__main__":
@@ -65,13 +67,7 @@ if __name__ == "__main__":
         sys.exit(1)
     ff = FileFinder()
     ff.get_files(sys.argv[1], mp3_handler)
-    print(str(mp3_count)+" mp3 files found.")
+    print(str(len(ff.mp3_records))+" mp3 files found.")
     sys.exit(0)
 
-def test_MediaFile():
-    f = MediaFile("E:\\music\\80s\\Joe Jackson\\Greatest Hits\\01 - Greatest Hits - Is She Really Going Out With Him- - Joe Jackson.mp3")
-    print(f.attributes)
 
-def test_FileFinder():
-    ff = FileFinder()
-    ff.get_files("E:\\music\\80s", mp3_handler)

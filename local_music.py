@@ -9,6 +9,7 @@
 import os,sys
 import eyed3
 import pathlib
+import pandas
 # 
 class MediaFile():
     def __init__(self, pathname) -> None:
@@ -17,15 +18,14 @@ class MediaFile():
             audiofile = eyed3.load(pathname)
             self.attributes["filename"] = pathname
             self.attributes["title"] = audiofile.tag.title
-            self.attributes["composer"] = audiofile.tag.composer
+            #self.attributes["composer"] = audiofile.tag.composer
             self.attributes["artist"] = audiofile.tag.artist
-            self.attributes["album_artist"] = audiofile.tag.album_artist
+            #self.attributes["album_artist"] = audiofile.tag.album_artist
             self.attributes["album"] = audiofile.tag.album
-            self.attributes["publisher"] = audiofile.tag.publisher
+            #self.attributes["publisher"] = audiofile.tag.publisher
             date = audiofile.tag.getBestDate()
             self.attributes["release_year"] = date.year
             self.attributes["duration_seconds"] = audiofile.info.time_secs
-            #self.attributes["genre"] = audiofile.Genre
         # TODO Add support for other media types like mp4, wmv, etc.
 class FileFinder():
     def __init__(self) -> None:
@@ -65,9 +65,21 @@ if __name__ == "__main__":
     except IndexError:
         print(f"Usage: {sys.argv[0]} <path to search>")
         sys.exit(1)
-    ff = FileFinder()
-    ff.get_files(sys.argv[1], mp3_handler)
-    print(str(len(ff.mp3_records))+" mp3 files found.")
+    eyed3.log.setLevel("ERROR")
+    print("1. Preview directory files")
+    print("2. Load to database")
+    print("3. Load directory files")
+    print("4. Remove invalid entries")
+    pandas.set_option('display.max_colwidth', None)
+    option = input("Enter an option from 1 to 1: ") 
+    if option == "1":
+        ff = FileFinder()
+        ff.get_files(sys.argv[1], mp3_handler)
+        df = pandas.DataFrame.from_records(ff.mp3_records,index=range(1,len(ff.mp3_records) + 1))
+        print(df.to_string())
+        #print(str(len(ff.mp3_records))+" mp3 files found.")
+    else:
+        print("Not implemented yet")
     sys.exit(0)
 
 

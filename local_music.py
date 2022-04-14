@@ -67,7 +67,7 @@ if __name__ == "__main__":
         sys.exit(1)
     eyed3.log.setLevel("ERROR")
     print("1. Preview directory files")
-    print("2. Load to database")
+    print("2. Load files to database")
     print("3. Load directory files")
     print("4. Remove invalid entries")
     pandas.set_option('display.max_colwidth', None)
